@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMASP v2 — Smart Medicine Awareness & Safety Platform</title>
+  <meta name="description" content="Understand how medicines work, compare them, and check your risk — for free, educationally."/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💊</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body data-page="home">
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <span class="brand-icon">💊</span>
+        <span>SMASP</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+          <li class="nav-item"><a class="nav-link active" href="index.html">🏠 Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#awareness">📚 Awareness</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">ℹ️ About</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <div class="hero-badge">🛡️ Educational Platform · Not Medical Advice</div>
+          <h1 class="hero-title">
+            Smart Medicine<br>
+            <span>Awareness &</span><br>
+            Safety Platform
+          </h1>
+          <p class="hero-subtitle">
+            Understand <em>how</em> medicines work, compare them side-by-side, and evaluate personal risk based on your health profile — all in one educational tool.
+          </p>
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="num">3</span><span class="label">Medicines</span></div>
+            <div class="hero-stat"><span class="num">8</span><span class="label">Conditions</span></div>
+            <div class="hero-stat"><span class="num">3</span><span class="label">Risk Levels</span></div>
+            <div class="hero-stat"><span class="num">🔊</span><span class="label">Voice Explain</span></div>
+          </div>
+        </div>
+        <div class="col-lg-5 offset-lg-1">
+          <div class="hero-card-float">
+            <div style="font-size:0.77rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);margin-bottom:10px;">New in v2.0</div>
+            <div class="pill-list">
+              <span class="hero-pill">🧠 Mechanism of Action</span>
+              <span class="hero-pill">📈 Body Journey Steps</span>
+              <span class="hero-pill">💡 Science Facts</span>
+              <span class="hero-pill">🏅 Safety Scores</span>
+              <span class="hero-pill">🔊 Voice Explanation</span>
+              <span class="hero-pill">✅ Multi-Condition</span>
+            </div>
+            <hr style="border-color:rgba(255,255,255,0.14);margin:16px 0;">
+            <div style="font-size:0.77rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);margin-bottom:10px;">Risk Levels</div>
+            <div class="pill-list">
+              <span class="hero-pill">✅ SAFE</span>
+              <span class="hero-pill">⚠️ CAUTION</span>
+              <span class="hero-pill">🚫 AVOID</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Main Section ── -->
+  <section style="padding:64px 0 80px;background:var(--warm-white);">
+    <div class="container">
+
+      <div class="ethical-notice mb-5">
+        <span class="notice-icon">⚠️</span>
+        <p><strong>Educational Awareness Only:</strong> This platform is for educational purposes only. It does not recommend dosage, diagnose, or prescribe. Always consult a qualified healthcare professional before taking any medication.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-9">
+          <div class="text-center mb-5">
+            <div class="section-label">Medicine Safety Check</div>
+            <h2 class="section-title">Evaluate Your Medicine Risk</h2>
+            <p class="section-subtitle mx-auto">Select your health conditions, choose a medicine (or two to compare), and get a full educational safety profile.</p>
+          </div>
+
+          <div class="search-card">
+            <div id="formError" style="display:none;background:#fdedec;border:1px solid #e74c3c;color:#c0392b;padding:12px 16px;border-radius:10px;font-size:0.88rem;font-weight:600;margin-bottom:20px;"></div>
+
+            <form id="searchForm" novalidate>
+
+              <!-- Step 1 -->
+              <div class="form-section-title">Step 1 — Describe Your Symptoms (Optional)</div>
+              <div class="mb-4">
+                <label for="diseaseInput" class="form-label">Disease / Symptom</label>
+                <input type="text" id="diseaseInput" class="form-control" placeholder="e.g. Headache, Fever, Joint pain, Back pain"/>
+                <div class="form-hint">Helps personalise your results — not used in risk logic.</div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="form-section-title">Step 2 — Select Your Health Conditions</div>
+              <div class="mb-4">
+                <div class="condition-checkbox-grid" id="conditionCheckboxes">
+                  <!-- Populated by JS -->
+                </div>
+                <div class="form-hint mt-2">Select <strong>all</strong> that apply. The worst applicable risk level will be shown.</div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="form-section-title">Step 3 — Choose Medicine(s)</div>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label for="medicine1Select" class="form-label">Primary Medicine <span style="color:var(--avoid-text);">*</span></label>
+                  <select id="medicine1Select" class="form-select"><!-- JS --></select>
+                  <div class="form-hint">The medicine you want to evaluate</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="medicine2Select" class="form-label">Compare With <span style="color:var(--text-muted);font-weight:400;">(Optional)</span></label>
+                  <select id="medicine2Select" class="form-select"><!-- JS --></select>
+                  <div class="form-hint">Select a second medicine for side-by-side comparison + safety score</div>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="form-section-title">Step 4 — Get Your Results</div>
+              <div class="d-flex align-items-center gap-3 flex-wrap">
+                <button type="submit" class="btn-primary-custom">🔍 Evaluate Safety</button>
+                <button type="reset" class="btn-secondary-custom">✕ Clear</button>
+                <span style="font-size:0.78rem;color:var(--text-muted);">Educational results only. Not medical advice.</span>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ── -->
+  <section class="features-section" id="about">
+    <div class="container">
+      <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+          <div class="section-label">Platform Features</div>
+          <h2 class="section-title">More Than a Drug Database</h2>
+          <p class="section-subtitle">SMASP explains <em>how</em> medicines work — not just what they're used for. Built for education, awareness, and public health empowerment.</p>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card">
+            <div class="feature-icon blue">🧠</div>
+            <h5>Mechanism of Action</h5>
+            <p>Understand exactly how each medicine works inside your body — from absorption to effect, step by step.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card">
+            <div class="feature-icon green">🏅</div>
+            <h5>Safety Score Comparison</h5>
+            <p>Compare two medicines with a visual safety score to instantly see which is safer for your specific conditions.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card">
+            <div class="feature-icon amber">🔊</div>
+            <h5>Voice Explanation</h5>
+            <p>Hit "Explain Like a Doctor" and hear a plain-language audio explanation of the medicine and your risk level.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="feature-card">
+            <div class="feature-icon rose">💡</div>
+            <h5>Quick Science Facts</h5>
+            <p>Surprising, memorable facts about each medicine to build lasting health literacy — not just temporary awareness.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Awareness ── -->
+  <section class="awareness-section" id="awareness">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="section-label">Safety Education</div>
+        <h2 class="section-title">Medicine Safety Awareness</h2>
+        <p class="section-subtitle mx-auto">Essential knowledge every person should have about medication safety.</p>
+      </div>
+      <div class="row g-4" id="awarenessGrid"><!-- JS --></div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-4">
+          <div class="footer-brand">
+            <span class="brand-icon">💊</span>
+            <span>SMASP v2.0</span>
+          </div>
+          <p>Smart Medicine Awareness & Safety Platform. An educational tool promoting informed medicine awareness. Not a substitute for professional medical advice.</p>
+        </div>
+        <div class="col-lg-2 col-md-4">
+          <div class="footer-heading">Navigation</div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <a href="index.html" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">🏠 Home</a>
+            <a href="result.html" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">📋 Results</a>
+            <a href="#awareness" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">📚 Awareness</a>
+            <a href="#about" style="color:rgba(255,255,255,0.5);font-size:0.85rem;">ℹ️ About</a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-4">
+          <div class="footer-heading">Risk Levels</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <span class="badge-safe" style="display:inline-flex;gap:6px;">✅ SAFE — No known conflict</span>
+            <span class="badge-caution" style="display:inline-flex;gap:6px;">⚠️ CAUTION — Use carefully</span>
+            <span class="badge-avoid" style="display:inline-flex;gap:6px;">🚫 AVOID — Contraindicated</span>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-4">
+          <div class="footer-heading">Disclaimer</div>
+          <p>For <strong style="color:rgba(255,255,255,0.7);">educational purposes only</strong>. No dosage advice. No diagnosis. Always consult a qualified healthcare professional.</p>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <div class="footer-bottom">
+        <span>© 2025 SMASP v2.0 · Smart Medicine Awareness & Safety Platform</span>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="#awareness">Awareness</a>
+          <a href="#about">About</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
