@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body data-page="result">
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
 
   <!-- ── Print Header (hidden on screen, visible on print) ── -->
   <div class="print-header">
@@ -33,6 +34,9 @@
           <li class="nav-item"><a class="nav-link" href="index.html">🏠 Home</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#awareness">📚 Awareness</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#about">ℹ️ About</a></li>
+          <li class="nav-item">
+            <button id="contrastToggle" type="button" class="btn btn-sm btn-outline-light ms-lg-2">🌓 Contrast</button>
+          </li>
         </ul>
       </div>
     </div>
@@ -59,7 +63,7 @@
   </div>
 
   <!-- ── Results Area ── -->
-  <section class="results-area" style="padding: 36px 0 80px;">
+  <section id="mainContent" class="results-area" style="padding: 36px 0 80px;">
     <div class="container">
 
       <!-- Risk Legend -->
@@ -77,6 +81,7 @@
           <p class="text-muted">Generating your safety report...</p>
         </div>
       </div>
+      <div id="sourceCitations" class="mt-4"></div>
     </div>
   </section>
 
