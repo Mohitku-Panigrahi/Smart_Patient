@@ -895,7 +895,7 @@ function renderAnalyticsHome() {
 function showHistoryModal() {
   const items = readHistory();
   if (!items.length) { notify('No history available yet.'); return; }
-  const lines = items.slice(0, 10).map(i => `${new Date(i.at).toLocaleString()}: ${i.med1}${i.med2 ? ` vs ${i.med2}` : ''}`).join('\n');
+  const lines = items.slice(0, 10).map(i => `${new Date(i.at).toLocaleString()}: ${escHtml(i.med1)}${i.med2 ? ` vs ${escHtml(i.med2)}` : ''}`).join('\n');
   notify(`Recent searches loaded. ${items.length} entries available.`);
   console.info(`Recent searches:\n\n${lines}`);
 }
@@ -928,11 +928,12 @@ function initAccessibilityControls() {
 // ── Render Results ────────────────────────────
 function renderResults() {
   const params     = new URLSearchParams(window.location.search);
-  const disease    = params.get('disease') || "";
   const condRaw    = params.get('conditions') || "";
-  const userConds  = condRaw ? condRaw.split(',') : [];
-  const med1Name   = params.get('med1') || "";
-  const med2Name   = params.get('med2') || "";
+  const userConds  = condRaw ? condRaw.split(',').map(c => c.trim()).filter(c => conditions.includes(c)) : [];
+  const med1NameRaw = params.get('med1') || "";
+  const med2NameRaw = params.get('med2') || "";
+  const med1Name = Object.keys(medicines).find(n => n === med1NameRaw) || "";
+  const med2Name = Object.keys(medicines).find(n => n === med2NameRaw) || "";
   const med1       = medicines[med1Name];
   const med2       = med2Name ? medicines[med2Name] : null;
   const ageGroup = params.get('ageGroup') || 'adult';
@@ -962,10 +963,8 @@ function renderResults() {
     const profileChip = `<span class="query-chip">👤 ${escHtml(ageGroup)}${pregnancy === 'yes' ? ' · pregnant' : ''}${breastfeeding === 'yes' ? ' · breastfeeding' : ''}</span>`;
     const allergyChip = allergies.length ? `<span class="query-chip">🧬 ${escHtml(allergies.join(', '))}</span>` : '';
     heroChips.innerHTML = `
-      ${disease ? `<span class="query-chip">🩺 ${escHtml(disease)}</span>` : ''}
       ${condChips}
       ${profileChip}
-      ${allergyChip}
       <span class="query-chip">💊 ${escHtml(med1Name)}${med2 ? ` vs ${escHtml(med2Name)}` : ''}</span>
     `;
   }
@@ -1035,11 +1034,11 @@ function toggleClinicianMode() {
 
 // ── DOMContentLoaded init ─────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  loadDatasetFromStorage();
   const page = document.body.dataset.page;
   initAccessibilityControls();
 
   if (page === 'home') {
+    loadDatasetFromStorage();
     populateConditionCheckboxes('conditionCheckboxes');
     populateMedicines('medicine1Select', '— Select primary medicine');
     populateMedicines('medicine2Select', '— Optional: compare with');
