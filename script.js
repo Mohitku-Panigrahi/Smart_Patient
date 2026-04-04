@@ -925,6 +925,44 @@ function initAccessibilityControls() {
   }
 }
 
+function createSimpleResultCard(name, med, risk, voiceLang) {
+  const card = document.createElement('div');
+  card.className = 'medicine-card p-3';
+
+  const title = document.createElement('h4');
+  title.textContent = `${med.icon} ${name}`;
+  card.appendChild(title);
+
+  const use = document.createElement('p');
+  use.textContent = `Used for: ${med.use}`;
+  card.appendChild(use);
+
+  const riskLine = document.createElement('p');
+  riskLine.textContent = `${risk.icon} ${risk.level} · Severity: ${risk.severity} · Confidence: ${risk.confidence}`;
+  card.appendChild(riskLine);
+
+  const reason = document.createElement('p');
+  reason.textContent = risk.reason;
+  card.appendChild(reason);
+
+  const voiceBtn = document.createElement('button');
+  voiceBtn.className = 'voice-btn';
+  voiceBtn.textContent = '🔊 Explain Like a Doctor';
+  voiceBtn.addEventListener('click', () => {
+    const voiceText = `${name}. Category: ${med.category}. ${med.mechanism} Risk for your condition: ${risk.level}. ${risk.reason}`;
+    speakMedicine(name, voiceText, voiceLang || 'en-US');
+  });
+  card.appendChild(voiceBtn);
+
+  const bookmarkBtn = document.createElement('button');
+  bookmarkBtn.className = 'btn-secondary-custom mt-2';
+  bookmarkBtn.textContent = `⭐ Bookmark ${name}`;
+  bookmarkBtn.addEventListener('click', () => bookmarkMedicine(name));
+  card.appendChild(bookmarkBtn);
+
+  return card;
+}
+
 // ── Render Results ────────────────────────────
 function renderResults() {
   const params     = new URLSearchParams(window.location.search);
@@ -940,6 +978,7 @@ function renderResults() {
   const pregnancy = params.get('pregnancy') || 'no';
   const breastfeeding = params.get('breastfeeding') || 'no';
   const allergies = getAllergiesFromParams(params);
+  const voiceLang = params.get('voiceLang') || localStorage.getItem('smasp_voice_lang') || 'en-US';
   const lang = params.get('lang') || getLang();
   setLang(lang);
   const profile = { ageGroup, pregnancy, breastfeeding };
@@ -961,7 +1000,6 @@ function renderResults() {
       ? userConds.map(c => `<span class="query-chip">❤️ ${escHtml(c)}</span>`).join('')
       : '<span class="query-chip">No conditions selected</span>';
     const profileChip = `<span class="query-chip">👤 ${escHtml(ageGroup)}${pregnancy === 'yes' ? ' · pregnant' : ''}${breastfeeding === 'yes' ? ' · breastfeeding' : ''}</span>`;
-    const allergyChip = allergies.length ? `<span class="query-chip">🧬 ${escHtml(allergies.join(', '))}</span>` : '';
     heroChips.innerHTML = `
       ${condChips}
       ${profileChip}
@@ -976,38 +1014,55 @@ function renderResults() {
   if (allergyRisk1) risk1 = { ...risk1, ...allergyRisk1, reason: [risk1.reason, allergyRisk1.reason].filter(Boolean).join(' ') };
   if (risk2 && allergyRisk2) risk2 = { ...risk2, ...allergyRisk2, reason: [risk2.reason, allergyRisk2.reason].filter(Boolean).join(' ') };
 
-  const card1HTML = buildMedicineCard(med1Name, med1, risk1);
-  const card2HTML = med2 ? buildMedicineCard(med2Name, med2, risk2) : buildComparePrompt();
-  const safetyBanner = med2 ? buildSafetyScoreBanner(med1Name, risk1, med2Name, risk2) : '';
-  const interactionBanner = med2 ? buildInteractionBanner(med1Name, med2Name) : '';
-  const compTable = med2 ? buildComparisonTable(med1Name, med1, risk1, med2Name, med2, risk2, userConds) : '';
+  const resultsContainer = document.getElementById('resultsContainer');
+  resultsContainer.replaceChildren();
 
-  document.getElementById('resultsContainer').innerHTML = `
-    ${safetyBanner}
-    ${interactionBanner}
-    <div class="row g-4 mb-4">
-      <div class="col-lg-${med2 ? '6' : '8 mx-auto'}">${card1HTML}</div>
-      ${med2
-        ? `<div class="col-lg-6">${card2HTML}</div>`
-        : `<div class="col-lg-4">${card2HTML}</div>`}
-    </div>
-    ${compTable}
-    <div class="back-row">
-      <a href="index.html" class="btn-primary-custom">← New Search</a>
-      <button id="printReportBtn" class="btn-secondary-custom">📄 Print Health Report</button>
-      <button id="clinicianModeBtn" class="btn-secondary-custom">🧑‍⚕️ Clinician Mode</button>
-      <button id="stopVoiceBtn" class="btn-secondary-custom">🔇 Stop Voice</button>
-    </div>
-  `;
+  if (med2) {
+    const compareSummary = document.createElement('div');
+    compareSummary.className = 'safety-score-banner';
+    const inter = evaluateInteraction(med1Name, med2Name);
+    compareSummary.textContent = `Comparison: ${med1Name} (${risk1.level}) vs ${med2Name} (${risk2.level}) · Interaction: ${inter.level} (${inter.severity})`;
+    resultsContainer.appendChild(compareSummary);
+  }
 
-  document.querySelectorAll('.js-voice-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      speakMedicine(btn.dataset.medName || '', btn.dataset.voiceText || '', btn.dataset.voiceLang || 'en-US');
-    });
-  });
-  document.querySelectorAll('.js-bookmark-btn').forEach(btn => {
-    btn.addEventListener('click', () => bookmarkMedicine(btn.dataset.medName || ''));
-  });
+  const row = document.createElement('div');
+  row.className = 'row g-4 mb-4';
+  const col1 = document.createElement('div');
+  col1.className = med2 ? 'col-lg-6' : 'col-lg-8 mx-auto';
+  col1.appendChild(createSimpleResultCard(med1Name, med1, risk1, voiceLang));
+  row.appendChild(col1);
+  if (med2) {
+    const col2 = document.createElement('div');
+    col2.className = 'col-lg-6';
+    col2.appendChild(createSimpleResultCard(med2Name, med2, risk2, voiceLang));
+    row.appendChild(col2);
+  }
+  resultsContainer.appendChild(row);
+
+  const backRow = document.createElement('div');
+  backRow.className = 'back-row';
+  const newSearch = document.createElement('a');
+  newSearch.href = 'index.html';
+  newSearch.className = 'btn-primary-custom';
+  newSearch.textContent = '← New Search';
+  backRow.appendChild(newSearch);
+  const printBtnEl = document.createElement('button');
+  printBtnEl.id = 'printReportBtn';
+  printBtnEl.className = 'btn-secondary-custom';
+  printBtnEl.textContent = '📄 Print Health Report';
+  backRow.appendChild(printBtnEl);
+  const clinicianBtnEl = document.createElement('button');
+  clinicianBtnEl.id = 'clinicianModeBtn';
+  clinicianBtnEl.className = 'btn-secondary-custom';
+  clinicianBtnEl.textContent = '🧑‍⚕️ Clinician Mode';
+  backRow.appendChild(clinicianBtnEl);
+  const stopVoiceBtnEl = document.createElement('button');
+  stopVoiceBtnEl.id = 'stopVoiceBtn';
+  stopVoiceBtnEl.className = 'btn-secondary-custom';
+  stopVoiceBtnEl.textContent = '🔇 Stop Voice';
+  backRow.appendChild(stopVoiceBtnEl);
+  resultsContainer.appendChild(backRow);
+
   const printBtn = document.getElementById('printReportBtn');
   if (printBtn) printBtn.addEventListener('click', () => printReport());
   const clinicianBtn = document.getElementById('clinicianModeBtn');
