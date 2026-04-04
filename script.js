@@ -218,6 +218,19 @@ const i18n = {
   }
 };
 
+function escHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function escAttr(value) {
+  return escHtml(value).replaceAll('`', '&#96;');
+}
+
 function getLang() {
   return localStorage.getItem('smasp_lang') || 'en';
 }
@@ -228,7 +241,9 @@ function loadDatasetFromStorage() {
     if (!stored) return;
     if (stored.medicines && typeof stored.medicines === 'object') medicines = stored.medicines;
     if (Array.isArray(stored.conditions)) conditions = stored.conditions;
-  } catch (_) {}
+  } catch (error) {
+    console.warn('Unable to load local dataset; using defaults.', error);
+  }
 }
 
 function saveDatasetToStorage() {
@@ -248,7 +263,9 @@ function initAdminPanel() {
   applyBtn.addEventListener('click', () => {
     try {
       const parsed = JSON.parse(txt.value || '{}');
-      if (!parsed.medicines || !parsed.conditions) throw new Error('Provide medicines and conditions.');
+      if (!parsed.medicines || !parsed.conditions) {
+        throw new Error("Invalid dataset: must contain 'medicines' object and 'conditions' array.");
+      }
       medicines = parsed.medicines;
       conditions = parsed.conditions;
       saveDatasetToStorage();
@@ -308,8 +325,9 @@ function evaluateRisk(userConditions, medicine) {
 function applyProfileRiskAdjustments(risk, medicine, profile) {
   const out = { ...risk, profileNotes: [] };
   if (!profile) return out;
+  const pediatricRestrictionPattern = /children?|under\s*\d+|pediatric|paediatric|minors?/i;
 
-  if (profile.ageGroup === 'child' && medicine?.who_cannot?.some(w => /children|under 16/i.test(w))) {
+  if (profile.ageGroup === 'child' && medicine?.who_cannot?.some(w => pediatricRestrictionPattern.test(w))) {
     out.level = "AVOID"; out.cssClass = "avoid"; out.icon = "🚫"; out.score = 1;
     out.severity = "High";
     out.reason = `${out.reason} Age profile indicates child; this medicine has pediatric restrictions.`;
@@ -377,8 +395,8 @@ function populateConditionCheckboxes(containerId) {
   if (!container) return;
   container.innerHTML = conditions.map(c => `
     <label class="condition-check-label">
-      <input type="checkbox" name="conditions" value="${c}" />
-      <span>${c}</span>
+      <input type="checkbox" name="conditions" value="${escAttr(c)}" />
+      <span>${escHtml(c)}</span>
     </label>
   `).join('');
 }
@@ -401,7 +419,7 @@ function populateMedicines(selectId, placeholder) {
 function populateDatalist(id, values) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.innerHTML = values.map(v => `<option value="${v}"></option>`).join('');
+  el.innerHTML = values.map(v => `<option value="${escAttr(v)}"></option>`).join('');
 }
 
 function filterConditions(query) {
@@ -468,12 +486,14 @@ function buildMedicineCard(name, med, risk) {
   const gaugeWidth = { safe: '90%', caution: '55%', avoid: '20%' }[risk.cssClass];
   const gaugeColor = { safe: 'var(--safe-border)', caution: 'var(--caution-border)', avoid: 'var(--avoid-border)' }[risk.cssClass];
 
+  const safeName = escHtml(name);
+  const safeCardId = escAttr(name.replace(/\s/g, ''));
   const stepsHTML = med.steps.map((s, i) => `
     <div class="mech-step">
-      <div class="mech-step-icon">${s.icon}</div>
+      <div class="mech-step-icon">${escHtml(s.icon)}</div>
       <div class="mech-step-content">
-        <strong>${s.label}</strong>
-        <span>${s.desc}</span>
+        <strong>${escHtml(s.label)}</strong>
+        <span>${escHtml(s.desc)}</span>
       </div>
       ${i < med.steps.length - 1 ? '<div class="mech-arrow">↓</div>' : ''}
     </div>
@@ -482,29 +502,29 @@ function buildMedicineCard(name, med, risk) {
   const didYouKnow = med.did_you_know.map(f => `
     <div class="dyk-fact">
       <span class="dyk-bullet">💡</span>
-      <span>${f}</span>
+      <span>${escHtml(f)}</span>
     </div>
   `).join('');
 
-  const whoCannotList = med.who_cannot.map(w => `<li>${w}</li>`).join('');
-  const dosageForms = (med.dosage_forms || []).map(d => `<span class="bookmark-chip">💊 ${d}</span>`).join('');
-  const profileNotes = (risk.profileNotes || []).map(n => `<div class="bookmark-chip">👤 ${n}</div>`).join('');
-  const redFlags = getRedFlags(risk).map(r => `<li>${r}</li>`).join('');
+  const whoCannotList = med.who_cannot.map(w => `<li>${escHtml(w)}</li>`).join('');
+  const dosageForms = (med.dosage_forms || []).map(d => `<span class="bookmark-chip">💊 ${escHtml(d)}</span>`).join('');
+  const profileNotes = (risk.profileNotes || []).map(n => `<div class="bookmark-chip">👤 ${escHtml(n)}</div>`).join('');
+  const redFlags = getRedFlags(risk).map(r => `<li>${escHtml(r)}</li>`).join('');
 
   const voiceText = `${name}. Category: ${med.category}. ${med.mechanism} Risk for your condition: ${risk.level}. ${risk.reason}`;
   const voiceLang = new URLSearchParams(window.location.search).get('voiceLang') || localStorage.getItem('smasp_voice_lang') || 'en-US';
 
   return `
-    <div class="medicine-card" id="card-${name.replace(/\s/g,'')}">
+    <div class="medicine-card" id="card-${safeCardId}">
 
       <!-- Header -->
       <div class="medicine-card-header">
         <div>
           <div class="med-category-tag">${med.category}</div>
-          <h3>${med.icon} ${name}</h3>
-          <div class="use-tag">Used for: ${med.use}</div>
+          <h3>${escHtml(med.icon)} ${safeName}</h3>
+          <div class="use-tag">Used for: ${escHtml(med.use)}</div>
         </div>
-        <span class="risk-badge ${risk.cssClass}">${risk.icon} ${risk.level}</span>
+        <span class="risk-badge ${escAttr(risk.cssClass)}">${escHtml(risk.icon)} ${escHtml(risk.level)}</span>
       </div>
 
       <!-- Risk Gauge -->
@@ -522,12 +542,12 @@ function buildMedicineCard(name, med, risk) {
 
       <!-- Risk Reason -->
       <div class="risk-reason ${risk.cssClass}">
-        <span class="risk-reason-icon">${risk.icon}</span>
-        <span>${risk.reason}</span>
+        <span class="risk-reason-icon">${escHtml(risk.icon)}</span>
+        <span>${escHtml(risk.reason)}</span>
       </div>
       <div class="severity-confidence-row px-4">
-        <div class="metric-card"><span class="label">Severity</span><span class="value">${risk.severity || 'Unknown'}</span></div>
-        <div class="metric-card"><span class="label">Confidence</span><span class="value">${risk.confidence || med.confidence || 'Moderate'}</span></div>
+        <div class="metric-card"><span class="label">Severity</span><span class="value">${escHtml(risk.severity || 'Unknown')}</span></div>
+        <div class="metric-card"><span class="label">Confidence</span><span class="value">${escHtml(risk.confidence || med.confidence || 'Moderate')}</span></div>
       </div>
       ${redFlags ? `<div class="red-flag-alert"><strong>🚨 Red Flags:</strong><ul style="margin:8px 0 0 18px;">${redFlags}</ul></div>` : ''}
 
@@ -540,11 +560,11 @@ function buildMedicineCard(name, med, risk) {
         <div class="info-row">
           <div class="info-chip">
             <span class="chip-label">Side Effects</span>
-            <span class="chip-value">${med.side_effects}</span>
+            <span class="chip-value">${escHtml(med.side_effects)}</span>
           </div>
           <div class="info-chip">
             <span class="chip-label">Learn More</span>
-            <span class="chip-value">${med.learn_more}</span>
+            <span class="chip-value">${escHtml(med.learn_more)}</span>
           </div>
         </div>
 
@@ -560,13 +580,13 @@ function buildMedicineCard(name, med, risk) {
             <div class="expand-body">
               <div class="mechanism-box">
                 <div class="mechanism-label">Mechanism of Action</div>
-                <p>${med.mechanism}</p>
+                <p>${escHtml(med.mechanism)}</p>
               </div>
               <div class="mechanism-box mt-3">
                 <div class="mechanism-label">How It Treats Your Problem</div>
-                <p>${med.treats}</p>
+                <p>${escHtml(med.treats)}</p>
               </div>
-              <div class="learn-more-tag">📘 Awareness Note: ${med.learn_more}</div>
+              <div class="learn-more-tag">📘 Awareness Note: ${escHtml(med.learn_more)}</div>
 
               <!-- Process Steps -->
               <div class="mech-steps-title">📈 Journey Through Your Body</div>
@@ -605,10 +625,10 @@ function buildMedicineCard(name, med, risk) {
         </div>
 
         <!-- Voice Button -->
-        <button class="voice-btn" onclick="speakMedicine('${name}', \`${voiceText.replace(/`/g,"'")}\`, '${voiceLang}')">
+        <button class="voice-btn js-voice-btn" data-med-name="${escAttr(name)}" data-voice-text="${escAttr(voiceText)}" data-voice-lang="${escAttr(voiceLang)}">
           🔊 Explain Like a Doctor
         </button>
-        <button class="btn-secondary-custom mt-2" onclick="bookmarkMedicine('${name}')">⭐ Bookmark ${name}</button>
+        <button class="btn-secondary-custom mt-2 js-bookmark-btn" data-med-name="${escAttr(name)}">⭐ Bookmark ${safeName}</button>
 
       </div>
     </div>
@@ -698,20 +718,20 @@ function buildInteractionBanner(med1Name, med2Name) {
 
 // ── Comparison Table ──────────────────────────
 function buildComparisonTable(name1, med1, risk1, name2, med2, risk2, conditions) {
-  const condStr = conditions.length ? conditions.join(', ') : 'None selected';
+  const condStr = conditions.length ? escHtml(conditions.join(', ')) : 'None selected';
   const rows = [
-    ["Category",       med1.category, med2.category],
-    ["Uses",           med1.use, med2.use],
+    ["Category",       escHtml(med1.category), escHtml(med2.category)],
+    ["Uses",           escHtml(med1.use), escHtml(med2.use)],
     ["Risk Level",
-      `<span class="comp-risk-cell ${risk1.cssClass}">${risk1.icon} ${risk1.level}</span>`,
-      `<span class="comp-risk-cell ${risk2.cssClass}">${risk2.icon} ${risk2.level}</span>`
+      `<span class="comp-risk-cell ${escAttr(risk1.cssClass)}">${escHtml(risk1.icon)} ${escHtml(risk1.level)}</span>`,
+      `<span class="comp-risk-cell ${escAttr(risk2.cssClass)}">${escHtml(risk2.icon)} ${escHtml(risk2.level)}</span>`
     ],
-    ["Mechanism",      med1.mechanism, med2.mechanism],
-    ["Treats",         med1.treats, med2.treats],
-    ["Side Effects",   med1.side_effects, med2.side_effects],
-    ["Avoid With",     med1.avoid.join(', ') || 'None', med2.avoid.join(', ') || 'None'],
-    ["Use Caution",    med1.caution.join(', ') || 'None', med2.caution.join(', ') || 'None'],
-    ["Risk Reason",    risk1.reason, risk2.reason]
+    ["Mechanism",      escHtml(med1.mechanism), escHtml(med2.mechanism)],
+    ["Treats",         escHtml(med1.treats), escHtml(med2.treats)],
+    ["Side Effects",   escHtml(med1.side_effects), escHtml(med2.side_effects)],
+    ["Avoid With",     escHtml(med1.avoid.join(', ') || 'None'), escHtml(med2.avoid.join(', ') || 'None')],
+    ["Use Caution",    escHtml(med1.caution.join(', ') || 'None'), escHtml(med2.caution.join(', ') || 'None')],
+    ["Risk Reason",    escHtml(risk1.reason), escHtml(risk2.reason)]
   ];
 
   return `
@@ -725,8 +745,8 @@ function buildComparisonTable(name1, med1, risk1, name2, med2, risk2, conditions
           <thead>
             <tr>
               <th>Attribute</th>
-              <th>${med1.icon} ${name1}</th>
-              <th>${med2.icon} ${name2}</th>
+              <th>${escHtml(med1.icon)} ${escHtml(name1)}</th>
+              <th>${escHtml(med2.icon)} ${escHtml(name2)}</th>
             </tr>
           </thead>
           <tbody>
@@ -762,11 +782,11 @@ function renderAwareness(containerId) {
     <div class="col-md-6 col-lg-3">
       <div class="awareness-card">
         <h5>
-          <span class="aw-icon" style="background:${tip.bg};">${tip.icon}</span>
-          ${tip.title}
+          <span class="aw-icon" style="background:${escAttr(tip.bg)};">${escHtml(tip.icon)}</span>
+          ${escHtml(tip.title)}
         </h5>
         <ul>
-          ${tip.tips.map(t => `<li>${t}</li>`).join('')}
+          ${tip.tips.map(t => `<li>${escHtml(t)}</li>`).join('')}
         </ul>
       </div>
     </div>
@@ -832,15 +852,15 @@ function renderAnalyticsHome() {
     <div class="row g-3">
       <div class="col-md-4">
         <h6 style="font-weight:800;">Top Medicines</h6>
-        ${topMeds.length ? `<ul>${topMeds.map(([m,c]) => `<li>${m} (${c})</li>`).join('')}</ul>` : '<p class="text-muted">No data yet.</p>'}
+        ${topMeds.length ? `<ul>${topMeds.map(([m,c]) => `<li>${escHtml(m)} (${escHtml(c)})</li>`).join('')}</ul>` : '<p class="text-muted">No data yet.</p>'}
       </div>
       <div class="col-md-4">
         <h6 style="font-weight:800;">Frequent Combinations</h6>
-        ${topPairs.length ? `<ul>${topPairs.map(([p,c]) => `<li>${p} (${c})</li>`).join('')}</ul>` : '<p class="text-muted">No comparison data yet.</p>'}
+        ${topPairs.length ? `<ul>${topPairs.map(([p,c]) => `<li>${escHtml(p)} (${escHtml(c)})</li>`).join('')}</ul>` : '<p class="text-muted">No comparison data yet.</p>'}
       </div>
       <div class="col-md-4">
         <h6 style="font-weight:800;">Bookmarked Medicines</h6>
-        ${bookmarkList.length ? `<div>${bookmarkList.map(b => `<span class="bookmark-chip">⭐ ${b}</span>`).join('')}</div>` : '<p class="text-muted">No bookmarks yet.</p>'}
+        ${bookmarkList.length ? `<div>${bookmarkList.map(b => `<span class="bookmark-chip">⭐ ${escHtml(b)}</span>`).join('')}</div>` : '<p class="text-muted">No bookmarks yet.</p>'}
       </div>
     </div>
   `;
@@ -860,7 +880,7 @@ function buildSourceCitations(meds) {
   return `
     <div class="sources-card">
       <h6>📚 Educational Sources</h6>
-      <ul>${unique.map(s => `<li>${s}</li>`).join('')}</ul>
+      <ul>${unique.map(s => `<li>${escHtml(s)}</li>`).join('')}</ul>
       <p style="margin:8px 0 0;font-size:0.78rem;color:var(--text-muted);">References are for education and awareness, not individual diagnosis or prescription.</p>
     </div>
   `;
@@ -910,16 +930,16 @@ function renderResults() {
   const heroChips = document.getElementById('heroChips');
   if (heroChips) {
     const condChips = userConds.length
-      ? userConds.map(c => `<span class="query-chip">❤️ ${c}</span>`).join('')
+      ? userConds.map(c => `<span class="query-chip">❤️ ${escHtml(c)}</span>`).join('')
       : '<span class="query-chip">No conditions selected</span>';
-    const profileChip = `<span class="query-chip">👤 ${ageGroup}${pregnancy === 'yes' ? ' · pregnant' : ''}${breastfeeding === 'yes' ? ' · breastfeeding' : ''}</span>`;
-    const allergyChip = allergies.length ? `<span class="query-chip">🧬 ${allergies.join(', ')}</span>` : '';
+    const profileChip = `<span class="query-chip">👤 ${escHtml(ageGroup)}${pregnancy === 'yes' ? ' · pregnant' : ''}${breastfeeding === 'yes' ? ' · breastfeeding' : ''}</span>`;
+    const allergyChip = allergies.length ? `<span class="query-chip">🧬 ${escHtml(allergies.join(', '))}</span>` : '';
     heroChips.innerHTML = `
-      ${disease ? `<span class="query-chip">🩺 ${disease}</span>` : ''}
+      ${disease ? `<span class="query-chip">🩺 ${escHtml(disease)}</span>` : ''}
       ${condChips}
       ${profileChip}
       ${allergyChip}
-      <span class="query-chip">💊 ${med1Name}${med2 ? ` vs ${med2Name}` : ''}</span>
+      <span class="query-chip">💊 ${escHtml(med1Name)}${med2 ? ` vs ${escHtml(med2Name)}` : ''}</span>
     `;
   }
 
@@ -927,8 +947,8 @@ function renderResults() {
   let risk2 = med2 ? applyProfileRiskAdjustments(evaluateRisk(userConds, med2), med2, profile) : null;
   const allergyRisk1 = evaluateAllergyRisk(med1, allergies);
   const allergyRisk2 = med2 ? evaluateAllergyRisk(med2, allergies) : null;
-  if (allergyRisk1) risk1 = { ...risk1, ...allergyRisk1, reason: `${risk1.reason} ${allergyRisk1.reason}` };
-  if (risk2 && allergyRisk2) risk2 = { ...risk2, ...allergyRisk2, reason: `${risk2.reason} ${allergyRisk2.reason}` };
+  if (allergyRisk1) risk1 = { ...risk1, ...allergyRisk1, reason: [risk1.reason, allergyRisk1.reason].filter(Boolean).join(' ') };
+  if (risk2 && allergyRisk2) risk2 = { ...risk2, ...allergyRisk2, reason: [risk2.reason, allergyRisk2.reason].filter(Boolean).join(' ') };
 
   const card1HTML = buildMedicineCard(med1Name, med1, risk1);
   const card2HTML = med2 ? buildMedicineCard(med2Name, med2, risk2) : buildComparePrompt();
@@ -948,26 +968,42 @@ function renderResults() {
     ${compTable}
     <div class="back-row">
       <a href="index.html" class="btn-primary-custom">← New Search</a>
-      <button onclick="printReport('${med1Name}','${med2Name || ''}','${userConds.join(', ') || 'None'}')" class="btn-secondary-custom">📄 Print Health Report</button>
-      <button onclick="window.__smaspClinicianMode && window.__smaspClinicianMode()" class="btn-secondary-custom">🧑‍⚕️ Clinician Mode</button>
-      <button onclick="window.speechSynthesis && window.speechSynthesis.cancel()" class="btn-secondary-custom">🔇 Stop Voice</button>
+      <button id="printReportBtn" class="btn-secondary-custom">📄 Print Health Report</button>
+      <button id="clinicianModeBtn" class="btn-secondary-custom">🧑‍⚕️ Clinician Mode</button>
+      <button id="stopVoiceBtn" class="btn-secondary-custom">🔇 Stop Voice</button>
     </div>
   `;
 
+  document.querySelectorAll('.js-voice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      speakMedicine(btn.dataset.medName || '', btn.dataset.voiceText || '', btn.dataset.voiceLang || 'en-US');
+    });
+  });
+  document.querySelectorAll('.js-bookmark-btn').forEach(btn => {
+    btn.addEventListener('click', () => bookmarkMedicine(btn.dataset.medName || ''));
+  });
+  const printBtn = document.getElementById('printReportBtn');
+  if (printBtn) printBtn.addEventListener('click', () => printReport());
+  const clinicianBtn = document.getElementById('clinicianModeBtn');
+  if (clinicianBtn) clinicianBtn.addEventListener('click', toggleClinicianMode);
+  const stopVoiceBtn = document.getElementById('stopVoiceBtn');
+  if (stopVoiceBtn) stopVoiceBtn.addEventListener('click', () => window.speechSynthesis && window.speechSynthesis.cancel());
+
   const srcEl = document.getElementById('sourceCitations');
   if (srcEl) srcEl.innerHTML = buildSourceCitations([med1, ...(med2 ? [med2] : [])]);
-  window.__smaspClinicianMode = () => {
-    document.body.classList.toggle('clinician-mode');
-    alert(document.body.classList.contains('clinician-mode') ? 'Clinician mode enabled for cleaner print summaries.' : 'Clinician mode disabled.');
-  };
 }
 
 // ── Print Report ──────────────────────────────
-function printReport(med1, med2, conditions) {
+function printReport() {
   const title = document.title;
   document.title = `Personal Medicine Awareness Report — SMASP`;
   window.print();
   document.title = title;
+}
+
+function toggleClinicianMode() {
+  document.body.classList.toggle('clinician-mode');
+  alert(document.body.classList.contains('clinician-mode') ? 'Clinician mode enabled for cleaner print summaries.' : 'Clinician mode disabled.');
 }
 
 // ── DOMContentLoaded init ─────────────────────
