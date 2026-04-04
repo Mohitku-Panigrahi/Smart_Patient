@@ -4,7 +4,7 @@
    ============================================ */
 
 // ── Enhanced Medicine Dataset ─────────────────
-const medicines = {
+const defaultMedicines = {
   "Paracetamol": {
     use: "Fever, mild pain, headache",
     category: "Analgesic / Antipyretic",
@@ -23,6 +23,17 @@ const medicines = {
       "Alcohol and paracetamol together dramatically increase liver strain."
     ],
     who_cannot: ["People with liver or kidney disease", "Heavy alcohol users", "Those with G6PD deficiency", "Anyone already taking other paracetamol-containing products"],
+    dosage_forms: ["Tablet", "Syrup", "Suppository", "IV"],
+    allergens: ["Paracetamol"],
+    age_caution: { child: "Dose must be weight-based.", elderly: "Monitor liver function in prolonged use." },
+    pregnancy: "Generally considered lower risk when advised by clinician.",
+    breastfeeding: "Usually compatible in standard doses after clinical advice.",
+    sources: [
+      "WHO Model List of Essential Medicines",
+      "NHS: Paracetamol guidance",
+      "FDA Drug Safety Communication"
+    ],
+    confidence: "Moderate",
     steps: [
       { icon: "💊", label: "Taken orally", desc: "Absorbed in the small intestine" },
       { icon: "🩸", label: "Enters bloodstream", desc: "Distributed throughout the body" },
@@ -48,6 +59,17 @@ const medicines = {
       "High doses increase risk of heart attack with long-term use."
     ],
     who_cannot: ["People with stomach ulcers or GI bleeding history", "Patients with severe heart failure", "Those with chronic kidney disease", "Pregnant women in 3rd trimester", "People taking blood thinners"],
+    dosage_forms: ["Tablet", "Capsule", "Suspension", "Topical Gel"],
+    allergens: ["NSAID"],
+    age_caution: { child: "Use age/weight-appropriate pediatric formulation.", elderly: "Higher GI and kidney risk with prolonged use." },
+    pregnancy: "Avoid in late pregnancy; seek clinician advice in all trimesters.",
+    breastfeeding: "Often compatible short term with professional advice.",
+    sources: [
+      "NHS: Ibuprofen guidance",
+      "Mayo Clinic Drug Monograph",
+      "EMA safety updates"
+    ],
+    confidence: "Moderate",
     steps: [
       { icon: "🔵", label: "Taken orally", desc: "Absorbed via the stomach and intestines" },
       { icon: "🩸", label: "Enters bloodstream", desc: "Binds to COX-1 and COX-2 enzymes" },
@@ -73,17 +95,88 @@ const medicines = {
       "Aspirin should never be given to children under 16 due to Reye's syndrome risk."
     ],
     who_cannot: ["People with bleeding disorders", "Children under 16 years old", "Those with aspirin-sensitive asthma", "Patients on blood thinners (warfarin)", "Those with active stomach ulcers"],
+    dosage_forms: ["Tablet", "Enteric-coated tablet", "Chewable tablet"],
+    allergens: ["Aspirin", "NSAID", "Salicylate"],
+    age_caution: { child: "Avoid in children under 16 due to Reye syndrome.", elderly: "Increased bleeding risk; monitor closely." },
+    pregnancy: "Not routinely used without specialist advice.",
+    breastfeeding: "Use with caution under professional guidance.",
+    sources: [
+      "NHS: Aspirin guidance",
+      "CDC antiplatelet education",
+      "FDA aspirin safety label"
+    ],
+    confidence: "Moderate",
     steps: [
       { icon: "🟡", label: "Taken orally", desc: "Rapidly absorbed in the stomach" },
       { icon: "🩸", label: "Enters bloodstream", desc: "Distributed to platelets and tissues" },
       { icon: "🔗", label: "Binds platelets", desc: "Irreversibly inactivates COX-1" },
       { icon: "❤️", label: "Effect", desc: "Clotting reduced, pain/fever lowered" }
     ]
+  },
+  "Diclofenac": {
+    use: "Pain, inflammation, musculoskeletal pain",
+    category: "NSAID / Anti-inflammatory",
+    icon: "🟠",
+    mechanism: "Inhibits cyclooxygenase enzymes to reduce prostaglandins and inflammation.",
+    treats: "Useful for joint/muscle inflammatory pain and swelling.",
+    description: "Common NSAID used for short-term inflammatory pain management.",
+    avoid: ["Stomach Ulcer", "Heart Disease"],
+    caution: ["High Blood Pressure", "Kidney Disease"],
+    side_effects: "GI irritation, fluid retention, elevated blood pressure",
+    learn_more: "Use lowest effective dose for shortest duration.",
+    did_you_know: [
+      "Topical diclofenac can reduce systemic exposure compared with oral forms.",
+      "Long-term oral NSAID use can increase cardiovascular risk."
+    ],
+    who_cannot: ["Active ulcer disease", "Late pregnancy", "Severe heart disease"],
+    dosage_forms: ["Tablet", "Topical Gel", "Patch", "Injection"],
+    allergens: ["NSAID"],
+    age_caution: { child: "Specialist pediatric advice needed.", elderly: "Higher kidney/GI risk in prolonged use." },
+    pregnancy: "Avoid particularly in 3rd trimester.",
+    breastfeeding: "May be used with caution after clinician review.",
+    sources: ["NHS medicine guidance", "EMA safety communications"],
+    confidence: "Moderate",
+    steps: [
+      { icon: "🟠", label: "Taken", desc: "Absorbed orally/topically depending on form" },
+      { icon: "🩸", label: "Distributed", desc: "Reaches inflamed tissues" },
+      { icon: "🧬", label: "COX inhibition", desc: "Lowers inflammatory mediators" },
+      { icon: "🧊", label: "Effect", desc: "Reduces pain and swelling" }
+    ]
+  },
+  "Naproxen": {
+    use: "Pain, inflammation, arthritis",
+    category: "NSAID / Anti-inflammatory",
+    icon: "🟣",
+    mechanism: "Blocks COX enzymes and reduces inflammatory prostaglandins.",
+    treats: "Useful for longer-duration pain control in inflammatory conditions.",
+    description: "Longer-acting NSAID used for inflammatory pain states.",
+    avoid: ["Stomach Ulcer"],
+    caution: ["High Blood Pressure", "Kidney Disease", "Heart Disease"],
+    side_effects: "Dyspepsia, GI bleed risk, fluid retention",
+    learn_more: "Take with food and monitor kidney function in chronic use.",
+    did_you_know: [
+      "Naproxen has a longer duration than ibuprofen.",
+      "Like other NSAIDs, it can increase GI bleeding risk."
+    ],
+    who_cannot: ["Active GI bleeding", "Late pregnancy"],
+    dosage_forms: ["Tablet", "Suspension", "Delayed-release tablet"],
+    allergens: ["NSAID"],
+    age_caution: { child: "Pediatric use should follow specialist advice.", elderly: "Higher bleeding and renal risk." },
+    pregnancy: "Avoid in later pregnancy.",
+    breastfeeding: "Assess with clinician before use.",
+    sources: ["NHS guidance", "FDA label summary"],
+    confidence: "Moderate",
+    steps: [
+      { icon: "🟣", label: "Taken orally", desc: "Absorbed through GI tract" },
+      { icon: "🩸", label: "In bloodstream", desc: "Circulates to painful tissues" },
+      { icon: "🧬", label: "COX blocked", desc: "Prostaglandins decrease" },
+      { icon: "🧊", label: "Effect", desc: "Pain and inflammation lowered" }
+    ]
   }
 };
 
 // ── Health Conditions ─────────────────────────
-const conditions = [
+const defaultConditions = [
   "Asthma",
   "Diabetes",
   "High Blood Pressure",
@@ -91,30 +184,183 @@ const conditions = [
   "Stomach Ulcer",
   "Bleeding Disorder",
   "Kidney Disease",
-  "Heart Disease"
+  "Heart Disease",
+  "Pregnancy",
+  "Breastfeeding"
 ];
+let medicines = JSON.parse(JSON.stringify(defaultMedicines));
+let conditions = [...defaultConditions];
+
+const symptomSuggestions = [
+  "Headache", "Fever", "Back pain", "Joint pain", "Toothache",
+  "Muscle pain", "Menstrual cramps", "Sore throat", "Body ache"
+];
+
+const knownAllergens = ["NSAID", "Aspirin", "Paracetamol", "Salicylate"];
+
+const interactionRules = [
+  { meds: ["Aspirin", "Ibuprofen"], level: "CAUTION", reason: "Ibuprofen may reduce aspirin antiplatelet effect and increase GI risk.", severity: "Medium", confidence: "Moderate" },
+  { meds: ["Aspirin", "Diclofenac"], level: "AVOID", reason: "Dual NSAID exposure significantly increases bleeding and GI toxicity risk.", severity: "High", confidence: "Moderate" },
+  { meds: ["Ibuprofen", "Naproxen"], level: "AVOID", reason: "Combining NSAIDs increases GI/kidney adverse event risk.", severity: "High", confidence: "High" },
+  { meds: ["Ibuprofen", "Diclofenac"], level: "AVOID", reason: "Avoid combining oral NSAIDs due to additive toxicity.", severity: "High", confidence: "High" }
+];
+
+const i18n = {
+  en: {
+    noCondition: "No health condition selected — no known conflicts identified.",
+    educationalOnly: "Educational results only. Not medical advice.",
+    riskReasonSafe: "No known conflict between this medicine and your selected condition(s). Always verify with a licensed healthcare professional."
+  },
+  hi: {
+    noCondition: "कोई स्वास्थ्य स्थिति चयनित नहीं — ज्ञात टकराव नहीं मिला।",
+    educationalOnly: "केवल शैक्षिक परिणाम। यह चिकित्सकीय सलाह नहीं है।",
+    riskReasonSafe: "चयनित स्वास्थ्य स्थितियों के साथ ज्ञात टकराव नहीं मिला। कृपया चिकित्सक से पुष्टि करें।"
+  }
+};
+
+function getLang() {
+  return localStorage.getItem('smasp_lang') || 'en';
+}
+
+function loadDatasetFromStorage() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('smasp_dataset') || 'null');
+    if (!stored) return;
+    if (stored.medicines && typeof stored.medicines === 'object') medicines = stored.medicines;
+    if (Array.isArray(stored.conditions)) conditions = stored.conditions;
+  } catch (_) {}
+}
+
+function saveDatasetToStorage() {
+  localStorage.setItem('smasp_dataset', JSON.stringify({ medicines, conditions }));
+}
+
+function initAdminPanel() {
+  const txt = document.getElementById('adminDatasetJson');
+  const loadBtn = document.getElementById('adminLoadCurrentBtn');
+  const applyBtn = document.getElementById('adminApplyBtn');
+  const resetBtn = document.getElementById('adminResetBtn');
+  if (!txt || !loadBtn || !applyBtn || !resetBtn) return;
+
+  loadBtn.addEventListener('click', () => {
+    txt.value = JSON.stringify({ medicines, conditions }, null, 2);
+  });
+  applyBtn.addEventListener('click', () => {
+    try {
+      const parsed = JSON.parse(txt.value || '{}');
+      if (!parsed.medicines || !parsed.conditions) throw new Error('Provide medicines and conditions.');
+      medicines = parsed.medicines;
+      conditions = parsed.conditions;
+      saveDatasetToStorage();
+      alert('Dataset applied. Refreshing form options.');
+      populateConditionCheckboxes('conditionCheckboxes');
+      ['medicine1Select', 'medicine2Select'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) sel.innerHTML = '';
+      });
+      populateMedicines('medicine1Select', '— Select primary medicine');
+      populateMedicines('medicine2Select', '— Optional: compare with');
+    } catch (e) {
+      alert(`Invalid JSON: ${e.message}`);
+    }
+  });
+  resetBtn.addEventListener('click', () => {
+    medicines = JSON.parse(JSON.stringify(defaultMedicines));
+    conditions = [...defaultConditions];
+    saveDatasetToStorage();
+    txt.value = '';
+    alert('Dataset reset to defaults.');
+    populateConditionCheckboxes('conditionCheckboxes');
+  });
+}
+
+function setLang(lang) {
+  localStorage.setItem('smasp_lang', lang);
+}
 
 // ── Risk Evaluation (supports multiple conditions) ─
 function evaluateRisk(userConditions, medicine) {
+  const lang = getLang();
+  const t = i18n[lang] || i18n.en;
   if (!userConditions || userConditions.length === 0) {
     return { level: "SAFE", cssClass: "safe", icon: "✅", score: 3,
-      reason: "No health condition selected — no known conflicts identified." };
+      reason: t.noCondition, severity: "Low", confidence: medicine.confidence || "Moderate" };
   }
   // Check avoid first (any avoid = worst outcome)
   for (const cond of userConditions) {
     if (medicine.avoid.includes(cond)) {
       return { level: "AVOID", cssClass: "avoid", icon: "🚫", score: 1,
-        reason: `This medicine should be AVOIDED with "${cond}". It may significantly worsen this condition or cause serious harm. Consult your doctor immediately.` };
+        reason: `This medicine should be AVOIDED with "${cond}". It may significantly worsen this condition or cause serious harm. Consult your doctor immediately.`,
+        severity: "High", confidence: medicine.confidence || "Moderate" };
     }
   }
   // Check caution
   const cautionHits = userConditions.filter(c => medicine.caution.includes(c));
   if (cautionHits.length > 0) {
     return { level: "CAUTION", cssClass: "caution", icon: "⚠️", score: 2,
-      reason: `Use with CAUTION if you have "${cautionHits.join(', ')}". This medicine can interact with this condition. Always inform your healthcare provider.` };
+      reason: `Use with CAUTION if you have "${cautionHits.join(', ')}". This medicine can interact with this condition. Always inform your healthcare provider.`,
+      severity: "Medium", confidence: medicine.confidence || "Moderate" };
   }
   return { level: "SAFE", cssClass: "safe", icon: "✅", score: 3,
-    reason: `No known conflict between this medicine and your selected condition(s). Always verify with a licensed healthcare professional.` };
+    reason: t.riskReasonSafe, severity: "Low", confidence: medicine.confidence || "Moderate" };
+}
+
+function applyProfileRiskAdjustments(risk, medicine, profile) {
+  const out = { ...risk, profileNotes: [] };
+  if (!profile) return out;
+
+  if (profile.ageGroup === 'child' && medicine?.who_cannot?.some(w => /children|under 16/i.test(w))) {
+    out.level = "AVOID"; out.cssClass = "avoid"; out.icon = "🚫"; out.score = 1;
+    out.severity = "High";
+    out.reason = `${out.reason} Age profile indicates child; this medicine has pediatric restrictions.`;
+    out.profileNotes.push("Child profile may increase risk.");
+  } else if (profile.ageGroup === 'elderly') {
+    out.profileNotes.push(medicine.age_caution?.elderly || "Elderly profile: monitor side effects closely.");
+  } else if (profile.ageGroup === 'child') {
+    out.profileNotes.push(medicine.age_caution?.child || "Child profile: use weight-based guidance from clinician.");
+  }
+
+  if (profile.pregnancy === 'yes') {
+    if (/avoid/i.test(medicine.pregnancy || "") || medicine.who_cannot.some(w => /pregnan/i.test(w))) {
+      out.level = "AVOID"; out.cssClass = "avoid"; out.icon = "🚫"; out.score = 1; out.severity = "High";
+    } else if (out.score > 2) {
+      out.level = "CAUTION"; out.cssClass = "caution"; out.icon = "⚠️"; out.score = 2; out.severity = "Medium";
+    }
+    out.profileNotes.push(`Pregnancy: ${medicine.pregnancy || "Consult clinician."}`);
+  }
+  if (profile.breastfeeding === 'yes') {
+    if (/caution|assess/i.test(medicine.breastfeeding || "") && out.score > 2) {
+      out.level = "CAUTION"; out.cssClass = "caution"; out.icon = "⚠️"; out.score = 2; out.severity = "Medium";
+    }
+    out.profileNotes.push(`Breastfeeding: ${medicine.breastfeeding || "Consult clinician."}`);
+  }
+  return out;
+}
+
+function evaluateAllergyRisk(medicine, allergies) {
+  if (!allergies?.length) return null;
+  const normalized = allergies.map(a => a.toLowerCase());
+  const hits = (medicine.allergens || []).filter(al => normalized.includes(al.toLowerCase()));
+  if (!hits.length) return null;
+  return {
+    level: "AVOID",
+    cssClass: "avoid",
+    icon: "🚫",
+    severity: "High",
+    confidence: "High",
+    reason: `Allergy/intolerance match found: ${hits.join(', ')}. Avoid this medicine and seek professional advice.`
+  };
+}
+
+function evaluateInteraction(med1Name, med2Name) {
+  if (!med1Name || !med2Name) return null;
+  const match = interactionRules.find(rule =>
+    rule.meds.includes(med1Name) && rule.meds.includes(med2Name)
+  );
+  if (!match) return { level: "SAFE", cssClass: "safe", icon: "✅", severity: "Low", confidence: "Low", reason: "No known interaction rule found in this educational dataset." };
+  const css = match.level === "AVOID" ? "avoid" : match.level === "CAUTION" ? "caution" : "safe";
+  const icon = css === "avoid" ? "🚫" : css === "caution" ? "⚠️" : "✅";
+  return { ...match, cssClass: css, icon };
 }
 
 // ── Safety Score Comparison ───────────────────
@@ -152,6 +398,32 @@ function populateMedicines(selectId, placeholder) {
   });
 }
 
+function populateDatalist(id, values) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = values.map(v => `<option value="${v}"></option>`).join('');
+}
+
+function filterConditions(query) {
+  const q = (query || "").trim().toLowerCase();
+  document.querySelectorAll('#conditionCheckboxes .condition-check-label').forEach(label => {
+    const text = label.textContent.toLowerCase();
+    label.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+function bindMedicineSearch() {
+  const input = document.getElementById('medicineSearchInput');
+  const select1 = document.getElementById('medicine1Select');
+  if (!input || !select1) return;
+  input.addEventListener('input', () => {
+    const term = input.value.trim().toLowerCase();
+    if (!term) return;
+    const name = Object.keys(medicines).find(m => m.toLowerCase().includes(term));
+    if (name) select1.value = name;
+  });
+}
+
 // ── Form Submit ───────────────────────────────
 function handleFormSubmit(e) {
   e.preventDefault();
@@ -159,6 +431,12 @@ function handleFormSubmit(e) {
   const checked   = [...document.querySelectorAll('input[name="conditions"]:checked')].map(el => el.value);
   const med1      = document.getElementById('medicine1Select')?.value || "";
   const med2      = document.getElementById('medicine2Select')?.value || "";
+  const ageGroup  = document.getElementById('ageGroupSelect')?.value || "adult";
+  const pregnancy = document.getElementById('pregnancySelect')?.value || "no";
+  const breastfeeding = document.getElementById('breastfeedingSelect')?.value || "no";
+  const allergiesRaw = document.getElementById('allergyInput')?.value || "";
+  const voiceLang = document.getElementById('voiceLanguageSelect')?.value || "en-US";
+  const language = document.getElementById('languageSelect')?.value || "en";
 
   if (!med1) { showFormError("Please select at least one medicine to evaluate."); return; }
 
@@ -167,6 +445,14 @@ function handleFormSubmit(e) {
   if (checked.length) params.set('conditions', checked.join(','));
   params.set('med1', med1);
   if (med2 && med2 !== med1) params.set('med2', med2);
+  params.set('ageGroup', ageGroup);
+  params.set('pregnancy', pregnancy);
+  params.set('breastfeeding', breastfeeding);
+  if (allergiesRaw.trim()) params.set('allergies', allergiesRaw);
+  params.set('voiceLang', voiceLang);
+  params.set('lang', language);
+  setLang(language);
+  pushHistoryRecord({ disease, conditions: checked, med1, med2, ageGroup, pregnancy, breastfeeding, allergies: allergiesRaw });
   window.location.href = `result.html?${params.toString()}`;
 }
 
@@ -201,8 +487,12 @@ function buildMedicineCard(name, med, risk) {
   `).join('');
 
   const whoCannotList = med.who_cannot.map(w => `<li>${w}</li>`).join('');
+  const dosageForms = (med.dosage_forms || []).map(d => `<span class="bookmark-chip">💊 ${d}</span>`).join('');
+  const profileNotes = (risk.profileNotes || []).map(n => `<div class="bookmark-chip">👤 ${n}</div>`).join('');
+  const redFlags = getRedFlags(risk).map(r => `<li>${r}</li>`).join('');
 
   const voiceText = `${name}. Category: ${med.category}. ${med.mechanism} Risk for your condition: ${risk.level}. ${risk.reason}`;
+  const voiceLang = new URLSearchParams(window.location.search).get('voiceLang') || localStorage.getItem('smasp_voice_lang') || 'en-US';
 
   return `
     <div class="medicine-card" id="card-${name.replace(/\s/g,'')}">
@@ -235,9 +525,16 @@ function buildMedicineCard(name, med, risk) {
         <span class="risk-reason-icon">${risk.icon}</span>
         <span>${risk.reason}</span>
       </div>
+      <div class="severity-confidence-row px-4">
+        <div class="metric-card"><span class="label">Severity</span><span class="value">${risk.severity || 'Unknown'}</span></div>
+        <div class="metric-card"><span class="label">Confidence</span><span class="value">${risk.confidence || med.confidence || 'Moderate'}</span></div>
+      </div>
+      ${redFlags ? `<div class="red-flag-alert"><strong>🚨 Red Flags:</strong><ul style="margin:8px 0 0 18px;">${redFlags}</ul></div>` : ''}
 
       <!-- Card Body -->
       <div class="medicine-card-body">
+        ${dosageForms ? `<div class="mb-3"><strong style="font-size:0.82rem;">Dosage forms:</strong><div class="mt-1">${dosageForms}</div></div>` : ''}
+        ${profileNotes ? `<div class="mb-3"><strong style="font-size:0.82rem;">Profile guidance:</strong><div class="mt-1">${profileNotes}</div></div>` : ''}
 
         <!-- Info chips -->
         <div class="info-row">
@@ -308,9 +605,10 @@ function buildMedicineCard(name, med, risk) {
         </div>
 
         <!-- Voice Button -->
-        <button class="voice-btn" onclick="speakMedicine('${name}', \`${voiceText.replace(/`/g,"'")}\`)">
+        <button class="voice-btn" onclick="speakMedicine('${name}', \`${voiceText.replace(/`/g,"'")}\`, '${voiceLang}')">
           🔊 Explain Like a Doctor
         </button>
+        <button class="btn-secondary-custom mt-2" onclick="bookmarkMedicine('${name}')">⭐ Bookmark ${name}</button>
 
       </div>
     </div>
@@ -318,13 +616,14 @@ function buildMedicineCard(name, med, risk) {
 }
 
 // ── Voice Synthesis ───────────────────────────
-function speakMedicine(name, text) {
+function speakMedicine(name, text, lang) {
   if (!window.speechSynthesis) { alert('Voice not supported in this browser.'); return; }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.88;
   utterance.pitch = 1;
-  utterance.lang = 'en-US';
+  utterance.lang = lang || 'en-US';
+  localStorage.setItem('smasp_voice_lang', utterance.lang);
   window.speechSynthesis.speak(utterance);
 }
 
@@ -374,6 +673,25 @@ function buildSafetyScoreBanner(name1, risk1, name2, risk2) {
         </div>
       </div>
       <p class="ssb-note">Score is based on risk level relative to your selected health condition(s). Educational only.</p>
+    </div>
+  `;
+}
+
+function buildInteractionBanner(med1Name, med2Name) {
+  if (!med2Name) return '';
+  const inter = evaluateInteraction(med1Name, med2Name);
+  return `
+    <div class="safety-score-banner" style="margin-top:-8px;">
+      <div class="ssb-header">
+        <span>🧪</span>
+        <h5>Drug–Drug Interaction Check</h5>
+        <span class="ssb-label ${inter.cssClass}">${inter.icon} ${inter.level}</span>
+      </div>
+      <p style="margin:0 0 8px;font-size:0.9rem;">${inter.reason}</p>
+      <div class="severity-confidence-row">
+        <div class="metric-card"><span class="label">Interaction Severity</span><span class="value">${inter.severity}</span></div>
+        <div class="metric-card"><span class="label">Interaction Confidence</span><span class="value">${inter.confidence}</span></div>
+      </div>
     </div>
   `;
 }
@@ -455,6 +773,111 @@ function renderAwareness(containerId) {
   `).join('');
 }
 
+function getRedFlags(risk) {
+  if (risk.level === 'AVOID') {
+    return [
+      "Seek immediate professional advice before taking this medicine.",
+      "If already taken and symptoms worsen, seek urgent care.",
+      "Do not combine with other pain medicines without guidance."
+    ];
+  }
+  if (risk.level === 'CAUTION') {
+    return ["Consult clinician/pharmacist before repeat dosing.", "Stop and seek care if severe side effects occur."];
+  }
+  return [];
+}
+
+function getAllergiesFromParams(params) {
+  const raw = params.get('allergies') || '';
+  return raw.split(',').map(a => a.trim()).filter(Boolean);
+}
+
+function pushHistoryRecord(record) {
+  const key = 'smasp_history';
+  const current = JSON.parse(localStorage.getItem(key) || '[]');
+  current.unshift({ ...record, at: new Date().toISOString() });
+  localStorage.setItem(key, JSON.stringify(current.slice(0, 25)));
+}
+
+function readHistory() {
+  return JSON.parse(localStorage.getItem('smasp_history') || '[]');
+}
+
+function bookmarkMedicine(name) {
+  const key = 'smasp_bookmarks';
+  const bookmarks = JSON.parse(localStorage.getItem(key) || '[]');
+  if (!bookmarks.includes(name)) bookmarks.push(name);
+  localStorage.setItem(key, JSON.stringify(bookmarks));
+  alert(`${name} bookmarked.`);
+}
+
+function renderAnalyticsHome() {
+  const panel = document.getElementById('analyticsPanel');
+  if (!panel) return;
+  const history = readHistory();
+  const medCount = {};
+  const pairCount = {};
+  history.forEach(h => {
+    if (h.med1) medCount[h.med1] = (medCount[h.med1] || 0) + 1;
+    if (h.med2) medCount[h.med2] = (medCount[h.med2] || 0) + 1;
+    if (h.med1 && h.med2) {
+      const k = [h.med1, h.med2].sort().join(' + ');
+      pairCount[k] = (pairCount[k] || 0) + 1;
+    }
+  });
+  const topMeds = Object.entries(medCount).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const topPairs = Object.entries(pairCount).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const bookmarkList = JSON.parse(localStorage.getItem('smasp_bookmarks') || '[]');
+  panel.innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-4">
+        <h6 style="font-weight:800;">Top Medicines</h6>
+        ${topMeds.length ? `<ul>${topMeds.map(([m,c]) => `<li>${m} (${c})</li>`).join('')}</ul>` : '<p class="text-muted">No data yet.</p>'}
+      </div>
+      <div class="col-md-4">
+        <h6 style="font-weight:800;">Frequent Combinations</h6>
+        ${topPairs.length ? `<ul>${topPairs.map(([p,c]) => `<li>${p} (${c})</li>`).join('')}</ul>` : '<p class="text-muted">No comparison data yet.</p>'}
+      </div>
+      <div class="col-md-4">
+        <h6 style="font-weight:800;">Bookmarked Medicines</h6>
+        ${bookmarkList.length ? `<div>${bookmarkList.map(b => `<span class="bookmark-chip">⭐ ${b}</span>`).join('')}</div>` : '<p class="text-muted">No bookmarks yet.</p>'}
+      </div>
+    </div>
+  `;
+}
+
+function showHistoryModal() {
+  const items = readHistory();
+  if (!items.length) { alert('No history available yet.'); return; }
+  const lines = items.slice(0, 10).map(i => `${new Date(i.at).toLocaleString()}: ${i.med1}${i.med2 ? ` vs ${i.med2}` : ''}`).join('\n');
+  alert(`Recent searches:\n\n${lines}`);
+}
+
+function buildSourceCitations(meds) {
+  const all = meds.flatMap(m => (m.sources || []).map(s => s.trim())).filter(Boolean);
+  const unique = [...new Set(all)];
+  if (!unique.length) return '';
+  return `
+    <div class="sources-card">
+      <h6>📚 Educational Sources</h6>
+      <ul>${unique.map(s => `<li>${s}</li>`).join('')}</ul>
+      <p style="margin:8px 0 0;font-size:0.78rem;color:var(--text-muted);">References are for education and awareness, not individual diagnosis or prescription.</p>
+    </div>
+  `;
+}
+
+function initAccessibilityControls() {
+  const btn = document.getElementById('contrastToggle');
+  const key = 'smasp_high_contrast';
+  if (localStorage.getItem(key) === '1') document.body.classList.add('high-contrast');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('high-contrast');
+      localStorage.setItem(key, document.body.classList.contains('high-contrast') ? '1' : '0');
+    });
+  }
+}
+
 // ── Render Results ────────────────────────────
 function renderResults() {
   const params     = new URLSearchParams(window.location.search);
@@ -465,6 +888,13 @@ function renderResults() {
   const med2Name   = params.get('med2') || "";
   const med1       = medicines[med1Name];
   const med2       = med2Name ? medicines[med2Name] : null;
+  const ageGroup = params.get('ageGroup') || 'adult';
+  const pregnancy = params.get('pregnancy') || 'no';
+  const breastfeeding = params.get('breastfeeding') || 'no';
+  const allergies = getAllergiesFromParams(params);
+  const lang = params.get('lang') || getLang();
+  setLang(lang);
+  const profile = { ageGroup, pregnancy, breastfeeding };
 
   if (!med1) {
     document.getElementById('resultsContainer').innerHTML = `
@@ -482,23 +912,33 @@ function renderResults() {
     const condChips = userConds.length
       ? userConds.map(c => `<span class="query-chip">❤️ ${c}</span>`).join('')
       : '<span class="query-chip">No conditions selected</span>';
+    const profileChip = `<span class="query-chip">👤 ${ageGroup}${pregnancy === 'yes' ? ' · pregnant' : ''}${breastfeeding === 'yes' ? ' · breastfeeding' : ''}</span>`;
+    const allergyChip = allergies.length ? `<span class="query-chip">🧬 ${allergies.join(', ')}</span>` : '';
     heroChips.innerHTML = `
       ${disease ? `<span class="query-chip">🩺 ${disease}</span>` : ''}
       ${condChips}
+      ${profileChip}
+      ${allergyChip}
       <span class="query-chip">💊 ${med1Name}${med2 ? ` vs ${med2Name}` : ''}</span>
     `;
   }
 
-  const risk1 = evaluateRisk(userConds, med1);
-  const risk2 = med2 ? evaluateRisk(userConds, med2) : null;
+  let risk1 = applyProfileRiskAdjustments(evaluateRisk(userConds, med1), med1, profile);
+  let risk2 = med2 ? applyProfileRiskAdjustments(evaluateRisk(userConds, med2), med2, profile) : null;
+  const allergyRisk1 = evaluateAllergyRisk(med1, allergies);
+  const allergyRisk2 = med2 ? evaluateAllergyRisk(med2, allergies) : null;
+  if (allergyRisk1) risk1 = { ...risk1, ...allergyRisk1, reason: `${risk1.reason} ${allergyRisk1.reason}` };
+  if (risk2 && allergyRisk2) risk2 = { ...risk2, ...allergyRisk2, reason: `${risk2.reason} ${allergyRisk2.reason}` };
 
   const card1HTML = buildMedicineCard(med1Name, med1, risk1);
   const card2HTML = med2 ? buildMedicineCard(med2Name, med2, risk2) : buildComparePrompt();
   const safetyBanner = med2 ? buildSafetyScoreBanner(med1Name, risk1, med2Name, risk2) : '';
+  const interactionBanner = med2 ? buildInteractionBanner(med1Name, med2Name) : '';
   const compTable = med2 ? buildComparisonTable(med1Name, med1, risk1, med2Name, med2, risk2, userConds) : '';
 
   document.getElementById('resultsContainer').innerHTML = `
     ${safetyBanner}
+    ${interactionBanner}
     <div class="row g-4 mb-4">
       <div class="col-lg-${med2 ? '6' : '8 mx-auto'}">${card1HTML}</div>
       ${med2
@@ -509,9 +949,17 @@ function renderResults() {
     <div class="back-row">
       <a href="index.html" class="btn-primary-custom">← New Search</a>
       <button onclick="printReport('${med1Name}','${med2Name || ''}','${userConds.join(', ') || 'None'}')" class="btn-secondary-custom">📄 Print Health Report</button>
+      <button onclick="window.__smaspClinicianMode && window.__smaspClinicianMode()" class="btn-secondary-custom">🧑‍⚕️ Clinician Mode</button>
       <button onclick="window.speechSynthesis && window.speechSynthesis.cancel()" class="btn-secondary-custom">🔇 Stop Voice</button>
     </div>
   `;
+
+  const srcEl = document.getElementById('sourceCitations');
+  if (srcEl) srcEl.innerHTML = buildSourceCitations([med1, ...(med2 ? [med2] : [])]);
+  window.__smaspClinicianMode = () => {
+    document.body.classList.toggle('clinician-mode');
+    alert(document.body.classList.contains('clinician-mode') ? 'Clinician mode enabled for cleaner print summaries.' : 'Clinician mode disabled.');
+  };
 }
 
 // ── Print Report ──────────────────────────────
@@ -524,13 +972,29 @@ function printReport(med1, med2, conditions) {
 
 // ── DOMContentLoaded init ─────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  loadDatasetFromStorage();
   const page = document.body.dataset.page;
+  initAccessibilityControls();
 
   if (page === 'home') {
     populateConditionCheckboxes('conditionCheckboxes');
     populateMedicines('medicine1Select', '— Select primary medicine');
     populateMedicines('medicine2Select', '— Optional: compare with');
+    populateDatalist('symptomSuggestions', symptomSuggestions);
+    populateDatalist('allergySuggestions', knownAllergens);
     renderAwareness('awarenessGrid');
+    renderAnalyticsHome();
+    bindMedicineSearch();
+    initAdminPanel();
+    const cSearch = document.getElementById('conditionSearchInput');
+    if (cSearch) cSearch.addEventListener('input', () => filterConditions(cSearch.value));
+    const historyBtn = document.getElementById('historyBtn');
+    if (historyBtn) historyBtn.addEventListener('click', showHistoryModal);
+    const langSelect = document.getElementById('languageSelect');
+    if (langSelect) {
+      langSelect.value = getLang();
+      langSelect.addEventListener('change', () => setLang(langSelect.value));
+    }
     const form = document.getElementById('searchForm');
     if (form) form.addEventListener('submit', handleFormSubmit);
   }
