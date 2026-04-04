@@ -231,6 +231,29 @@ function escAttr(value) {
   return escHtml(value).replaceAll('`', '&#96;');
 }
 
+function getOrCreateLiveRegion() {
+  let el = document.getElementById('appLiveRegion');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'appLiveRegion';
+  el.setAttribute('aria-live', 'polite');
+  el.setAttribute('aria-atomic', 'true');
+  el.style.position = 'fixed';
+  el.style.left = '-9999px';
+  el.style.width = '1px';
+  el.style.height = '1px';
+  el.style.overflow = 'hidden';
+  document.body.appendChild(el);
+  return el;
+}
+
+function notify(message) {
+  const text = String(message || '');
+  const live = getOrCreateLiveRegion();
+  live.textContent = text;
+  console.info(text);
+}
+
 function getLang() {
   return localStorage.getItem('smasp_lang') || 'en';
 }
@@ -269,7 +292,7 @@ function initAdminPanel() {
       medicines = parsed.medicines;
       conditions = parsed.conditions;
       saveDatasetToStorage();
-      alert('Dataset applied. Refreshing form options.');
+      notify('Dataset applied. Refreshing form options.');
       populateConditionCheckboxes('conditionCheckboxes');
       ['medicine1Select', 'medicine2Select'].forEach(id => {
         const sel = document.getElementById(id);
@@ -278,7 +301,7 @@ function initAdminPanel() {
       populateMedicines('medicine1Select', '— Select primary medicine');
       populateMedicines('medicine2Select', '— Optional: compare with');
     } catch (e) {
-      alert(`Invalid JSON: ${e.message}`);
+      notify(`Invalid JSON: ${e.message}`);
     }
   });
   resetBtn.addEventListener('click', () => {
@@ -286,7 +309,7 @@ function initAdminPanel() {
     conditions = [...defaultConditions];
     saveDatasetToStorage();
     txt.value = '';
-    alert('Dataset reset to defaults.');
+    notify('Dataset reset to defaults.');
     populateConditionCheckboxes('conditionCheckboxes');
   });
 }
@@ -325,7 +348,7 @@ function evaluateRisk(userConditions, medicine) {
 function applyProfileRiskAdjustments(risk, medicine, profile) {
   const out = { ...risk, profileNotes: [] };
   if (!profile) return out;
-  const pediatricRestrictionPattern = /children?|under\s*\d+|pediatric|paediatric|minors?/i;
+  const pediatricRestrictionPattern = /children?|under\s*\d+|aged?\s*under|below\s*\d+\s*years?|pediatric|paediatric|minors?/i;
 
   if (profile.ageGroup === 'child' && medicine?.who_cannot?.some(w => pediatricRestrictionPattern.test(w))) {
     out.level = "AVOID"; out.cssClass = "avoid"; out.icon = "🚫"; out.score = 1;
@@ -637,7 +660,7 @@ function buildMedicineCard(name, med, risk) {
 
 // ── Voice Synthesis ───────────────────────────
 function speakMedicine(name, text, lang) {
-  if (!window.speechSynthesis) { alert('Voice not supported in this browser.'); return; }
+  if (!window.speechSynthesis) { notify('Voice not supported in this browser.'); return; }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.88;
@@ -666,6 +689,9 @@ function buildSafetyScoreBanner(name1, risk1, name2, risk2) {
   const s1 = risk1.score, s2 = risk2.score;
   const scoreLabel = { 3: 'SAFE', 2: 'CAUTION', 1: 'AVOID' };
   const colorClass = { safe: '#27ae60', caution: '#d4ac0d', avoid: '#e74c3c' };
+  const safeName1 = escHtml(name1);
+  const safeName2 = escHtml(name2);
+  const saferName = escHtml(safer.name);
 
   return `
     <div class="safety-score-banner">
@@ -673,23 +699,23 @@ function buildSafetyScoreBanner(name1, risk1, name2, risk2) {
         <span>🏅</span>
         <h5>Safety Comparison Score</h5>
         ${safer.name !== 'Both Equal'
-          ? `<span class="ssb-winner">🟢 Safer for your condition: <strong>${safer.name}</strong></span>`
+          ? `<span class="ssb-winner">🟢 Safer for your condition: <strong>${saferName}</strong></span>`
           : `<span class="ssb-winner">🟢 Both medicines have equal safety for your condition.</span>`}
       </div>
       <div class="ssb-scores">
         <div class="ssb-score-item">
-          <div class="ssb-med-name">${name1}</div>
+          <div class="ssb-med-name">${safeName1}</div>
           <div class="ssb-bar-wrap">
             <div class="ssb-bar" style="width:${(s1/3)*100}%;background:${colorClass[risk1.cssClass]};"></div>
           </div>
-          <span class="ssb-label ${risk1.cssClass}">${risk1.icon} ${scoreLabel[s1]}</span>
+          <span class="ssb-label ${escAttr(risk1.cssClass)}">${escHtml(risk1.icon)} ${escHtml(scoreLabel[s1])}</span>
         </div>
         <div class="ssb-score-item">
-          <div class="ssb-med-name">${name2}</div>
+          <div class="ssb-med-name">${safeName2}</div>
           <div class="ssb-bar-wrap">
             <div class="ssb-bar" style="width:${(s2/3)*100}%;background:${colorClass[risk2.cssClass]};"></div>
           </div>
-          <span class="ssb-label ${risk2.cssClass}">${risk2.icon} ${scoreLabel[s2]}</span>
+          <span class="ssb-label ${escAttr(risk2.cssClass)}">${escHtml(risk2.icon)} ${escHtml(scoreLabel[s2])}</span>
         </div>
       </div>
       <p class="ssb-note">Score is based on risk level relative to your selected health condition(s). Educational only.</p>
@@ -705,12 +731,12 @@ function buildInteractionBanner(med1Name, med2Name) {
       <div class="ssb-header">
         <span>🧪</span>
         <h5>Drug–Drug Interaction Check</h5>
-        <span class="ssb-label ${inter.cssClass}">${inter.icon} ${inter.level}</span>
+        <span class="ssb-label ${escAttr(inter.cssClass)}">${escHtml(inter.icon)} ${escHtml(inter.level)}</span>
       </div>
-      <p style="margin:0 0 8px;font-size:0.9rem;">${inter.reason}</p>
+      <p style="margin:0 0 8px;font-size:0.9rem;">${escHtml(inter.reason)}</p>
       <div class="severity-confidence-row">
-        <div class="metric-card"><span class="label">Interaction Severity</span><span class="value">${inter.severity}</span></div>
-        <div class="metric-card"><span class="label">Interaction Confidence</span><span class="value">${inter.confidence}</span></div>
+        <div class="metric-card"><span class="label">Interaction Severity</span><span class="value">${escHtml(inter.severity)}</span></div>
+        <div class="metric-card"><span class="label">Interaction Confidence</span><span class="value">${escHtml(inter.confidence)}</span></div>
       </div>
     </div>
   `;
@@ -828,7 +854,7 @@ function bookmarkMedicine(name) {
   const bookmarks = JSON.parse(localStorage.getItem(key) || '[]');
   if (!bookmarks.includes(name)) bookmarks.push(name);
   localStorage.setItem(key, JSON.stringify(bookmarks));
-  alert(`${name} bookmarked.`);
+  notify(`${name} bookmarked.`);
 }
 
 function renderAnalyticsHome() {
@@ -868,9 +894,10 @@ function renderAnalyticsHome() {
 
 function showHistoryModal() {
   const items = readHistory();
-  if (!items.length) { alert('No history available yet.'); return; }
+  if (!items.length) { notify('No history available yet.'); return; }
   const lines = items.slice(0, 10).map(i => `${new Date(i.at).toLocaleString()}: ${i.med1}${i.med2 ? ` vs ${i.med2}` : ''}`).join('\n');
-  alert(`Recent searches:\n\n${lines}`);
+  notify(`Recent searches loaded. ${items.length} entries available.`);
+  console.info(`Recent searches:\n\n${lines}`);
 }
 
 function buildSourceCitations(meds) {
@@ -1003,7 +1030,7 @@ function printReport() {
 
 function toggleClinicianMode() {
   document.body.classList.toggle('clinician-mode');
-  alert(document.body.classList.contains('clinician-mode') ? 'Clinician mode enabled for cleaner print summaries.' : 'Clinician mode disabled.');
+  notify(document.body.classList.contains('clinician-mode') ? 'Clinician mode enabled for cleaner print summaries.' : 'Clinician mode disabled.');
 }
 
 // ── DOMContentLoaded init ─────────────────────
